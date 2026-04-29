@@ -74,7 +74,7 @@ export default async function Dashboard() {
       <main className="min-h-screen px-6 py-10 bg-cream">
         <div className="max-w-6xl mx-auto">
           <header className="mb-8">
-            <h1 className="text-3xl font-semibold text-navy">Coeo COGS dashboard</h1>
+            <h1 className="text-3xl font-semibold text-navy">Coeo Profitability dashboard</h1>
           </header>
           <div className="rounded-card bg-white border border-border p-8 text-center">
             <h2 className="text-xl font-semibold text-navy">No data yet</h2>
@@ -160,9 +160,9 @@ export default async function Dashboard() {
       <div className="max-w-6xl mx-auto space-y-6">
         <header className="flex items-baseline justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-navy">Coeo COGS dashboard</h1>
+            <h1 className="text-3xl font-semibold text-navy">Coeo Profitability dashboard</h1>
             <p className="text-text-secondary text-sm mt-1">
-              Voice profitability and circuit COGS for the loaded period.
+              Voice profitability and circuit costs for the loaded period.
             </p>
           </div>
           <Link
@@ -180,7 +180,7 @@ export default async function Dashboard() {
             sublabel="Voice CDR (Rev.IO)"
           />
           <KpiCard
-            label="Total COGS"
+            label="Total cost"
             value={usd(totalCogs)}
             sublabel={`Voice ${usd(totalVoiceCost)} · Circuit ${usd(totalCircuitCost)}`}
           />
@@ -247,7 +247,7 @@ export default async function Dashboard() {
           </div>
 
           <div className="rounded-card bg-white border border-border p-5">
-            <h3 className="font-semibold text-navy">Circuit COGS by customer</h3>
+            <h3 className="font-semibold text-navy">Circuit costs by customer</h3>
             <p className="text-xs text-text-secondary mt-1">
               Top 15 by carrier cost · revenue mapping not yet implemented
             </p>

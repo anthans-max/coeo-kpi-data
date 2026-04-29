@@ -28,7 +28,7 @@ export default function middleware(request: NextRequest) {
   return new NextResponse("Authentication required.", {
     status: 401,
     headers: {
-      "WWW-Authenticate": 'Basic realm="Coeo COGS"',
+      "WWW-Authenticate": 'Basic realm="Coeo Profitability"',
     },
   });
 }

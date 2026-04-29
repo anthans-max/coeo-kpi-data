@@ -10,8 +10,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Coeo COGS",
-  description: "Coeo COGS & profitability mapping",
+  title: "Coeo Profitability",
+  description: "Coeo profitability mapping",
 };
 
 export default function RootLayout({
