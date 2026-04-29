@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MatchRateBar } from "@/components/match-rate-bar";
 import { DataQualityBanner } from "@/components/data-quality-banner";
 import { PageFooter } from "@/components/page-footer";
+import { Logo } from "@/components/logo";
 
 const RECONCILIATION_SOURCES =
   "Bandwidth CDR · Peerless LD Term CDR · Inteliquent CDR · Rev.IO Inventory Items";
@@ -46,11 +47,14 @@ export default async function ReconciliationPage() {
     return (
       <main className="min-h-screen px-6 py-10 bg-cream">
         <div className="max-w-6xl mx-auto space-y-6">
-          <header>
-            <h1 className="text-3xl font-semibold text-navy">Reconciliation</h1>
-            <p className="text-text-secondary text-sm mt-1">
-              Per-run match rates and data quality flags.
-            </p>
+          <header className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-semibold text-navy">Reconciliation</h1>
+              <p className="text-text-secondary text-sm mt-1">
+                Per-run match rates and data quality flags.
+              </p>
+            </div>
+            <Logo />
           </header>
           <div className="rounded-card bg-white border border-border p-8 text-center">
             <h2 className="text-xl font-semibold text-navy">No runs yet</h2>
@@ -89,12 +93,15 @@ export default async function ReconciliationPage() {
   return (
     <main className="min-h-screen px-6 py-10 bg-cream">
       <div className="max-w-6xl mx-auto space-y-6">
-        <header>
-          <h1 className="text-3xl font-semibold text-navy">Reconciliation</h1>
-          <p className="text-text-secondary text-sm mt-1">
-            {runs.length.toLocaleString()} {runs.length === 1 ? "run" : "runs"} recorded.
-            Newest first.
-          </p>
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-semibold text-navy">Reconciliation</h1>
+            <p className="text-text-secondary text-sm mt-1">
+              {runs.length.toLocaleString()} {runs.length === 1 ? "run" : "runs"} recorded.
+              Newest first.
+            </p>
+          </div>
+          <Logo />
         </header>
 
         {runs.map((run, idx) => (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { Logo } from "@/components/logo";
 import { PageFooter } from "@/components/page-footer";
 import { CircuitsClient, type CircuitRow } from "./circuits-client";
 
@@ -21,11 +22,14 @@ export default async function CircuitsPage() {
   return (
     <main className="min-h-screen px-6 py-10 bg-cream">
       <div className="max-w-6xl mx-auto space-y-6">
-        <header>
-          <h1 className="text-3xl font-semibold text-navy">Circuit costs</h1>
-          <p className="text-text-secondary text-sm mt-1">
-            RazorFlow circuit detail. Revenue mapping is not yet implemented — costs only.
-          </p>
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-semibold text-navy">Circuit costs</h1>
+            <p className="text-text-secondary text-sm mt-1">
+              RazorFlow circuit detail. Revenue mapping is not yet implemented — costs only.
+            </p>
+          </div>
+          <Logo />
         </header>
 
         {rows.length === 0 ? (

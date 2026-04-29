@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { Logo } from "@/components/logo";
 import { PageFooter } from "@/components/page-footer";
 import { VoiceClient, type VoiceRow } from "./voice-client";
 
@@ -21,13 +22,16 @@ export default async function VoicePage() {
   return (
     <main className="min-h-screen px-6 py-10 bg-cream">
       <div className="max-w-6xl mx-auto space-y-6">
-        <header>
-          <h1 className="text-3xl font-semibold text-navy">Voice profitability</h1>
-          <p className="text-text-secondary text-sm mt-1">
-            Per-(customer, carrier) rows from the latest compute run. Revenue is allocated
-            proportionally by cost share; rows with carrier &quot;—&quot; hold revenue for
-            customers with no matched carrier cost.
-          </p>
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-semibold text-navy">Voice profitability</h1>
+            <p className="text-text-secondary text-sm mt-1">
+              Per-(customer, carrier) rows from the latest compute run. Revenue is allocated
+              proportionally by cost share; rows with carrier &quot;—&quot; hold revenue for
+              customers with no matched carrier cost.
+            </p>
+          </div>
+          <Logo />
         </header>
 
         {rows.length === 0 ? (

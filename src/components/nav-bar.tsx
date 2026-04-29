@@ -16,7 +16,7 @@ export function NavBar() {
   return (
     <nav className="border-b border-border bg-white">
       <div className="max-w-6xl mx-auto px-6 py-3 flex gap-6 text-sm">
-        <span className="font-semibold text-navy mr-2">Coeo Profitability</span>
+        <span className="font-semibold text-navy mr-2">COEO Profitability</span>
         {LINKS.map((l) => {
           const active =
             l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);

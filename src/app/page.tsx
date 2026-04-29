@@ -4,6 +4,7 @@ import { KpiCard } from "@/components/kpi-card";
 import { MatchRateBar } from "@/components/match-rate-bar";
 import { DataQualityBanner } from "@/components/data-quality-banner";
 import { PageFooter } from "@/components/page-footer";
+import { Logo } from "@/components/logo";
 
 const DASHBOARD_SOURCES =
   "Rev.IO Rated CDR (revenue) · Rev.IO Inventory Items (TN lookup) · Bandwidth / Peerless / Inteliquent CDRs (carrier cost) · RazorFlow Circuit Detail (circuit cost)";
@@ -77,8 +78,9 @@ export default async function Dashboard() {
     return (
       <main className="min-h-screen px-6 py-10 bg-cream">
         <div className="max-w-6xl mx-auto">
-          <header className="mb-8">
-            <h1 className="text-3xl font-semibold text-navy">Coeo Profitability dashboard</h1>
+          <header className="mb-8 flex items-start justify-between gap-4">
+            <h1 className="text-3xl font-semibold text-navy">COEO Profitability dashboard</h1>
+            <Logo />
           </header>
           <div className="rounded-card bg-white border border-border p-8 text-center">
             <h2 className="text-xl font-semibold text-navy">No data yet</h2>
@@ -163,19 +165,14 @@ export default async function Dashboard() {
   return (
     <main className="min-h-screen px-6 py-10 bg-cream">
       <div className="max-w-6xl mx-auto space-y-6">
-        <header className="flex items-baseline justify-between">
+        <header className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-navy">Coeo Profitability dashboard</h1>
+            <h1 className="text-3xl font-semibold text-navy">COEO Profitability dashboard</h1>
             <p className="text-text-secondary text-sm mt-1">
               Voice profitability and circuit costs for the loaded period.
             </p>
           </div>
-          <Link
-            href="/upload"
-            className="text-sm text-navy underline hover:no-underline"
-          >
-            Manage uploads
-          </Link>
+          <Logo />
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
