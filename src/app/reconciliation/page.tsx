@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { MatchRateBar } from "@/components/match-rate-bar";
 import { DataQualityBanner } from "@/components/data-quality-banner";
 import { PageFooter } from "@/components/page-footer";
-import { Logo } from "@/components/logo";
 
 const RECONCILIATION_SOURCES =
   "Bandwidth CDR · Peerless LD Term CDR · Inteliquent CDR · Rev.IO Inventory Items";
@@ -54,7 +53,6 @@ export default async function ReconciliationPage() {
                 Per-run match rates and data quality flags.
               </p>
             </div>
-            <Logo />
           </header>
           <div className="rounded-card bg-white border border-border p-8 text-center">
             <h2 className="text-xl font-semibold text-navy">No runs yet</h2>
@@ -101,7 +99,6 @@ export default async function ReconciliationPage() {
               Newest first.
             </p>
           </div>
-          <Logo />
         </header>
 
         {runs.map((run, idx) => (

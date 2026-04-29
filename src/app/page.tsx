@@ -4,7 +4,6 @@ import { KpiCard } from "@/components/kpi-card";
 import { MatchRateBar } from "@/components/match-rate-bar";
 import { DataQualityBanner } from "@/components/data-quality-banner";
 import { PageFooter } from "@/components/page-footer";
-import { Logo } from "@/components/logo";
 
 const DASHBOARD_SOURCES =
   "Rev.IO Rated CDR (revenue) · Rev.IO Inventory Items (TN lookup) · Bandwidth / Peerless / Inteliquent CDRs (carrier cost) · RazorFlow Circuit Detail (circuit cost)";
@@ -80,7 +79,6 @@ export default async function Dashboard() {
         <div className="max-w-6xl mx-auto">
           <header className="mb-8 flex items-start justify-between gap-4">
             <h1 className="text-3xl font-semibold text-navy">COEO Profitability dashboard</h1>
-            <Logo />
           </header>
           <div className="rounded-card bg-white border border-border p-8 text-center">
             <h2 className="text-xl font-semibold text-navy">No data yet</h2>
@@ -172,7 +170,6 @@ export default async function Dashboard() {
               Voice profitability and circuit costs for the loaded period.
             </p>
           </div>
-          <Logo />
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Logo } from "@/components/logo";
 import { PageFooter } from "@/components/page-footer";
 import { VoiceClient, type VoiceRow } from "./voice-client";
 
@@ -31,7 +30,6 @@ export default async function VoicePage() {
               customers with no matched carrier cost.
             </p>
           </div>
-          <Logo />
         </header>
 
         {rows.length === 0 ? (

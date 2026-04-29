@@ -1,5 +1,4 @@
 import { getUploadStatus } from "@/app/actions/upload";
-import { Logo } from "@/components/logo";
 import { UploadClient } from "./upload-client";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +18,6 @@ export default async function UploadPage() {
               files have non-overlapping date ranges.
             </p>
           </div>
-          <Logo />
         </header>
 
         <UploadClient initialStatus={status} />

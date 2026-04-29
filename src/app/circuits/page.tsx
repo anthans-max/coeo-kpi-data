@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Logo } from "@/components/logo";
 import { PageFooter } from "@/components/page-footer";
 import { CircuitsClient, type CircuitRow } from "./circuits-client";
 
@@ -29,7 +28,6 @@ export default async function CircuitsPage() {
               RazorFlow circuit detail. Revenue mapping is not yet implemented — costs only.
             </p>
           </div>
-          <Logo />
         </header>
 
         {rows.length === 0 ? (

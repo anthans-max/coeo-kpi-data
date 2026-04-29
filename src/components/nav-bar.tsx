@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Logo } from "@/components/logo";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
@@ -15,7 +16,7 @@ export function NavBar() {
   const pathname = usePathname() ?? "/";
   return (
     <nav className="border-b border-border bg-white">
-      <div className="max-w-6xl mx-auto px-6 py-3 flex gap-6 text-sm">
+      <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-6 text-sm">
         <span className="font-semibold text-navy mr-2">COEO Profitability</span>
         {LINKS.map((l) => {
           const active =
@@ -34,6 +35,9 @@ export function NavBar() {
             </Link>
           );
         })}
+        <div className="ml-auto">
+          <Logo />
+        </div>
       </div>
     </nav>
   );
