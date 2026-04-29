@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PageFooter } from "@/components/page-footer";
 import { VoiceClient, type VoiceRow } from "./voice-client";
+
+const VOICE_SOURCES =
+  "Rev.IO Rated CDR (revenue) · Rev.IO Inventory Items (TN → customer mapping) · Bandwidth CDR · Peerless LD Term CDR · Inteliquent CDR (carrier cost) · Carrier cost shows $0.00 until CDR files cover the same accounting period as inventory";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +46,8 @@ export default async function VoicePage() {
         ) : (
           <VoiceClient rows={rows} />
         )}
+
+        <PageFooter sources={VOICE_SOURCES} />
       </div>
     </main>
   );

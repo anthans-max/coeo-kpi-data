@@ -2,6 +2,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { MatchRateBar } from "@/components/match-rate-bar";
 import { DataQualityBanner } from "@/components/data-quality-banner";
+import { PageFooter } from "@/components/page-footer";
+
+const RECONCILIATION_SOURCES =
+  "Bandwidth CDR · Peerless LD Term CDR · Inteliquent CDR · Rev.IO Inventory Items";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +64,7 @@ export default async function ReconciliationPage() {
               Go to upload
             </Link>
           </div>
+          <PageFooter sources={RECONCILIATION_SOURCES} />
         </div>
       </main>
     );
@@ -95,6 +100,8 @@ export default async function ReconciliationPage() {
         {runs.map((run, idx) => (
           <RunCard key={run.computedAt} run={run} latest={idx === 0} />
         ))}
+
+        <PageFooter sources={RECONCILIATION_SOURCES} />
       </div>
     </main>
   );

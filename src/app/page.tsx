@@ -3,6 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 import { KpiCard } from "@/components/kpi-card";
 import { MatchRateBar } from "@/components/match-rate-bar";
 import { DataQualityBanner } from "@/components/data-quality-banner";
+import { PageFooter } from "@/components/page-footer";
+
+const DASHBOARD_SOURCES =
+  "Rev.IO Rated CDR (revenue) · Rev.IO Inventory Items (TN lookup) · Bandwidth / Peerless / Inteliquent CDRs (carrier cost) · RazorFlow Circuit Detail (circuit cost)";
 
 export const dynamic = "force-dynamic";
 
@@ -88,6 +92,7 @@ export default async function Dashboard() {
               Go to upload
             </Link>
           </div>
+          <PageFooter sources={DASHBOARD_SOURCES} />
         </div>
       </main>
     );
@@ -316,6 +321,8 @@ export default async function Dashboard() {
             })}
           </div>
         </div>
+
+        <PageFooter sources={DASHBOARD_SOURCES} />
       </div>
     </main>
   );

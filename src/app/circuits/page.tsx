@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PageFooter } from "@/components/page-footer";
 import { CircuitsClient, type CircuitRow } from "./circuits-client";
+
+const CIRCUITS_SOURCES =
+  "RazorFlow Circuit Detail (carrier cost) · Circuit revenue not yet implemented — requires Salesforce Circuit and RazorFlow ProvInventory (Phase 2)";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +44,8 @@ export default async function CircuitsPage() {
         ) : (
           <CircuitsClient rows={rows} />
         )}
+
+        <PageFooter sources={CIRCUITS_SOURCES} />
       </div>
     </main>
   );
