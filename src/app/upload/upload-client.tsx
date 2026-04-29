@@ -8,6 +8,7 @@ import {
   finalizeUpload,
   insertBatch,
 } from "@/app/actions/upload";
+import { computeProfitability } from "@/app/actions/compute";
 import { parseFor } from "@/lib/parse";
 import {
   ALL_SOURCES,
@@ -293,22 +294,41 @@ function StatusPill({ status }: { status: UploadStatus | null }) {
 }
 
 function ComputeBar({ allLoaded }: { allLoaded: boolean }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function onClick() {
+    setError(null);
+    startTransition(async () => {
+      try {
+        await computeProfitability();
+        router.push("/");
+      } catch (err) {
+        setError((err as Error).message);
+      }
+    });
+  }
+
+  const disabled = !allLoaded || isPending;
+
   return (
-    <div className="rounded-card bg-white border border-border p-5 flex items-center justify-between">
+    <div className="rounded-card bg-white border border-border p-5 flex items-center justify-between gap-4">
       <div>
         <h3 className="font-semibold text-navy">Compute profitability</h3>
         <p className="text-xs text-text-secondary mt-1">
           {allLoaded
-            ? "All six sources loaded. Compute action ships in Session 2."
-            : "Upload all six sources to enable computation. Compute action ships in Session 2."}
+            ? "All six sources loaded. Click to compute and view the dashboard."
+            : "Upload all six sources to enable computation."}
         </p>
+        {error && <p className="text-xs text-destructive mt-2">{error}</p>}
       </div>
       <button
-        disabled
-        className="rounded-pill bg-orange/40 px-5 py-2 text-white text-sm font-medium cursor-not-allowed"
-        title="Available in Session 2"
+        onClick={onClick}
+        disabled={disabled}
+        className="rounded-pill bg-orange px-5 py-2 text-white text-sm font-medium hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
       >
-        Compute
+        {isPending ? "Computing…" : "Compute"}
       </button>
     </div>
   );
