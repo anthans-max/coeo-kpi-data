@@ -114,10 +114,26 @@ export default async function Dashboard() {
   const totalCdrs = reconRows.reduce((s, r) => s + r.total_cdrs, 0);
   const overallMatchRate = totalCdrs > 0 ? totalMatched / totalCdrs : null;
 
-  // Top 20 voice profitability rows by margin (revenue > 0 to make the sort meaningful).
-  const voiceTop = voiceRows
-    .filter((r) => Number(r.total_revenue) > 0)
-    .sort((a, b) => Number(b.gross_margin) - Number(a.gross_margin))
+  // Top 20 voice profitability rows by margin. After Session 3, voice rows are per
+  // (customer, carrier) — so aggregate to per-customer before ranking.
+  type VoiceAgg = { customer_id: string; revenue: number; cost: number; grossProfit: number; margin: number };
+  const customerAgg = new Map<string, { revenue: number; cost: number }>();
+  for (const r of voiceRows) {
+    const a = customerAgg.get(r.customer_id) ?? { revenue: 0, cost: 0 };
+    a.revenue += Number(r.total_revenue) || 0;
+    a.cost += Number(r.total_cost) || 0;
+    customerAgg.set(r.customer_id, a);
+  }
+  const voiceTop: VoiceAgg[] = [...customerAgg.entries()]
+    .map(([customer_id, { revenue, cost }]) => ({
+      customer_id,
+      revenue,
+      cost,
+      grossProfit: revenue - cost,
+      margin: revenue > 0 ? (revenue - cost) / revenue : 0,
+    }))
+    .filter((r) => r.revenue > 0)
+    .sort((a, b) => b.margin - a.margin)
     .slice(0, 20);
 
   // Top 15 circuits, grouped by customer.
@@ -219,16 +235,10 @@ export default async function Dashboard() {
                       className="border-b border-border-light last:border-b-0"
                     >
                       <td className="py-2 font-mono text-xs">{r.customer_id}</td>
-                      <td className="py-2 text-right">
-                        {usd(Number(r.total_revenue))}
-                      </td>
-                      <td className="py-2 text-right">{usd(Number(r.total_cost))}</td>
-                      <td className="py-2 text-right">
-                        {usd(Number(r.gross_profit))}
-                      </td>
-                      <td className="py-2 text-right">
-                        {pct(Number(r.gross_margin))}
-                      </td>
+                      <td className="py-2 text-right">{usd(r.revenue)}</td>
+                      <td className="py-2 text-right">{usd(r.cost)}</td>
+                      <td className="py-2 text-right">{usd(r.grossProfit)}</td>
+                      <td className="py-2 text-right">{pct(r.margin)}</td>
                     </tr>
                   ))}
                 </tbody>

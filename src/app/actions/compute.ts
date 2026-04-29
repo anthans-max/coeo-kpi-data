@@ -42,6 +42,10 @@ async function fetchAll<T>(
 export async function computeProfitability(): Promise<ComputeSummary> {
   const supabase = await createClient();
 
+  // One timestamp shared by all reconciliation rows in this run, so /reconciliation
+  // can group rows by computed_at into "runs".
+  const computedAt = new Date().toISOString();
+
   // 1. Inventory → TN-to-customer map.
   type InvRow = { identifier_tn: string | null; customer_id: string | null };
   const inventory = await fetchAll<InvRow>(
@@ -56,7 +60,7 @@ export async function computeProfitability(): Promise<ComputeSummary> {
     }
   }
 
-  // 2. Carrier CDRs → cost per customer + per-carrier reconciliation counters.
+  // 2. Carrier CDRs → cost per (customer, carrier) + per-carrier reconciliation counters.
   type CarrierRow = {
     carrier: string;
     call_date: string | null;
@@ -69,13 +73,14 @@ export async function computeProfitability(): Promise<ComputeSummary> {
     "carrier, call_date, terminating_tn, carrier_cost",
   );
 
-  type CustomerCost = {
+  type CarrierCost = {
     callCount: number;
     totalCost: number;
     minDate: string | null;
     maxDate: string | null;
   };
-  const customerCost = new Map<string, CustomerCost>();
+  // customer_id → carrier → cost bucket
+  const customerCarrierCost = new Map<string, Map<Carrier, CarrierCost>>();
 
   type Counter = { total: number; matched: number; unmatched: number; zeroCost: number };
   const reconciliation: Record<Carrier, Counter> = {
@@ -99,7 +104,9 @@ export async function computeProfitability(): Promise<ComputeSummary> {
     }
     counter.matched += 1;
 
-    const bucket = customerCost.get(customerId) ?? {
+    const inner =
+      customerCarrierCost.get(customerId) ?? new Map<Carrier, CarrierCost>();
+    const bucket = inner.get(row.carrier) ?? {
       callCount: 0,
       totalCost: 0,
       minDate: null,
@@ -111,7 +118,8 @@ export async function computeProfitability(): Promise<ComputeSummary> {
       if (!bucket.minDate || row.call_date < bucket.minDate) bucket.minDate = row.call_date;
       if (!bucket.maxDate || row.call_date > bucket.maxDate) bucket.maxDate = row.call_date;
     }
-    customerCost.set(customerId, bucket);
+    inner.set(row.carrier, bucket);
+    customerCarrierCost.set(customerId, inner);
   }
 
   // 3. Rated CDRs → revenue per customer.
@@ -147,8 +155,7 @@ export async function computeProfitability(): Promise<ComputeSummary> {
     customerRevenue.set(row.customer_id, r);
   }
 
-  // 4. Wipe prior compute results. Both tables have computed_at default now() so a
-  //    > epoch filter satisfies Supabase's "WHERE clause required" rule.
+  // 4. Wipe profitability snapshot. Reconciliation log accumulates history — do not wipe.
   {
     const { error } = await supabase
       .from("cogs_voice_profitability")
@@ -156,39 +163,72 @@ export async function computeProfitability(): Promise<ComputeSummary> {
       .gt("computed_at", "1970-01-01");
     if (error) throw new Error(`Wipe profitability failed: ${error.message}`);
   }
-  {
-    const { error } = await supabase
-      .from("cogs_reconciliation_log")
-      .delete()
-      .gt("computed_at", "1970-01-01");
-    if (error) throw new Error(`Wipe reconciliation log failed: ${error.message}`);
-  }
 
-  // 5. Profitability rows — one per customer that appears in either side.
+  // 5. Profitability rows — per (customer, carrier) with proportional revenue allocation.
+  //    If a customer has no matched cost, write a single (customer, NULL) row holding
+  //    all revenue and zero cost.
   const customerIds = new Set<string>([
-    ...customerCost.keys(),
+    ...customerCarrierCost.keys(),
     ...customerRevenue.keys(),
   ]);
 
-  const profitabilityRows = Array.from(customerIds).map((customerId) => {
-    const cost = customerCost.get(customerId);
-    const rev = customerRevenue.get(customerId);
-    const dates = [cost?.minDate, cost?.maxDate, rev?.minDate, rev?.maxDate].filter(
-      (d): d is string => typeof d === "string" && d.length > 0,
-    );
-    const periodStart = dates.length > 0 ? dates.reduce((a, b) => (a < b ? a : b)) : null;
-    const periodEnd = dates.length > 0 ? dates.reduce((a, b) => (a > b ? a : b)) : null;
+  type ProfitabilityRow = {
+    customer_id: string;
+    carrier: string | null;
+    call_count: number;
+    total_revenue: number;
+    total_cost: number;
+    period_start: string | null;
+    period_end: string | null;
+  };
+  const profitabilityRows: ProfitabilityRow[] = [];
 
-    return {
-      customer_id: customerId,
-      carrier: null,
-      call_count: cost?.callCount ?? 0,
-      total_revenue: rev?.revenue ?? 0,
-      total_cost: cost?.totalCost ?? 0,
-      period_start: periodStart,
-      period_end: periodEnd,
-    };
-  });
+  for (const customerId of customerIds) {
+    const inner = customerCarrierCost.get(customerId);
+    const rev = customerRevenue.get(customerId);
+    const customerRevenueTotal = rev?.revenue ?? 0;
+
+    const totalCost = inner
+      ? Array.from(inner.values()).reduce((s, b) => s + b.totalCost, 0)
+      : 0;
+
+    if (inner && totalCost > 0) {
+      // Proportional allocation: each carrier row carries cost share × total revenue.
+      for (const [carrier, bucket] of inner) {
+        const share = bucket.totalCost / totalCost;
+        const dates = [
+          bucket.minDate,
+          bucket.maxDate,
+          rev?.minDate ?? null,
+          rev?.maxDate ?? null,
+        ].filter((d): d is string => typeof d === "string" && d.length > 0);
+
+        profitabilityRows.push({
+          customer_id: customerId,
+          carrier,
+          call_count: bucket.callCount,
+          total_revenue: customerRevenueTotal * share,
+          total_cost: bucket.totalCost,
+          period_start: dates.length > 0 ? dates.reduce((a, b) => (a < b ? a : b)) : null,
+          period_end: dates.length > 0 ? dates.reduce((a, b) => (a > b ? a : b)) : null,
+        });
+      }
+    } else {
+      // No matched carrier cost — keep revenue on a single NULL-carrier row.
+      const dates = [rev?.minDate ?? null, rev?.maxDate ?? null].filter(
+        (d): d is string => typeof d === "string" && d.length > 0,
+      );
+      profitabilityRows.push({
+        customer_id: customerId,
+        carrier: null,
+        call_count: 0,
+        total_revenue: customerRevenueTotal,
+        total_cost: 0,
+        period_start: dates.length > 0 ? dates.reduce((a, b) => (a < b ? a : b)) : null,
+        period_end: dates.length > 0 ? dates.reduce((a, b) => (a > b ? a : b)) : null,
+      });
+    }
+  }
 
   let customersWritten = 0;
   if (profitabilityRows.length > 0) {
@@ -201,7 +241,7 @@ export async function computeProfitability(): Promise<ComputeSummary> {
     }
   }
 
-  // 6. Reconciliation log — always 3 rows, one per carrier, even with zero data.
+  // 6. Reconciliation log — always 3 rows, one per carrier, with a shared computed_at.
   const reconciliationRows = CARRIERS.map((c) => {
     const r = reconciliation[c];
     const matchRate = r.total > 0 ? r.matched / r.total : null;
@@ -214,6 +254,7 @@ export async function computeProfitability(): Promise<ComputeSummary> {
     }
 
     return {
+      computed_at: computedAt,
       carrier: c,
       total_cdrs: r.total,
       matched_cdrs: r.matched,
@@ -233,6 +274,9 @@ export async function computeProfitability(): Promise<ComputeSummary> {
 
   revalidatePath("/");
   revalidatePath("/upload");
+  revalidatePath("/voice");
+  revalidatePath("/circuits");
+  revalidatePath("/reconciliation");
 
   const totalCdrs = CARRIERS.reduce((s, c) => s + reconciliation[c].total, 0);
   const totalMatched = CARRIERS.reduce((s, c) => s + reconciliation[c].matched, 0);
